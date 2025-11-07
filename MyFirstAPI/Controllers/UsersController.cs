@@ -44,5 +44,23 @@ namespace UserManagement.Api.Controllers
 
             return CreatedAtAction(nameof(GetUserById), new { id = newUser.Id }, newUser);
         }
+
+        [HttpPut("{id}")]
+        public IActionResult UpdateUser(int id, [FromBody] User updatedUser)
+        {
+            if (updatedUser == null) {
+                return BadRequest();
+            }
+
+            var userToUpdate = _users.FirstOrDefault(u => u.Id == id);
+
+            if (userToUpdate == null) {
+                return NotFound();
+            }
+
+            userToUpdate.Name = updatedUser.Name;
+            userToUpdate.Email = updatedUser.Email;
+            return NoContent();
+        }   
     }
 }
