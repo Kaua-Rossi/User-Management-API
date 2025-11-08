@@ -61,6 +61,19 @@ namespace UserManagement.Api.Controllers
             userToUpdate.Name = updatedUser.Name;
             userToUpdate.Email = updatedUser.Email;
             return NoContent();
-        }   
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteUser(int id)
+        {
+            var userToDelete = _users.FirstOrDefault(u => u.Id == id);
+
+            if (userToDelete == null) {
+                return NotFound();
+            }
+
+            _users.Remove(userToDelete);
+            return NoContent();
+        }
     }
 }
