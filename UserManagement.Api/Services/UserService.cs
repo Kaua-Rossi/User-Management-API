@@ -1,42 +1,54 @@
-﻿using UserManagement.Api.Models;
+﻿using UserManagement.Api.Data;
+using UserManagement.Api.Models;
 
 namespace UserManagement.Api.Services
 {
-    public static class UserService
+    public class UserService
     {
-        private static List<User> _users = new List<User>
+        private readonly AppDbContext _context;
+
+        public UserService(AppDbContext context)
         {
-            new User { Id = 1, Name = "Daniel Ross", Email = "daniel67@domain.com" },
-            new User { Id = 2, Name = "Alice Johnson", Email = "alice32@domain.com" },
-            new User { Id = 3, Name = "John Doe", Email = "jdoe1900@domain.com" }
-        };
-
-        public static List<User> GetAll() => _users;
-
-        public static User? Get(int id) => _users.FirstOrDefault(u => u.Id == id);
-
-        public static void Add(User user)
-        {
-            user.Id = _users.Count > 0 ? _users.Max(u => u.Id) + 1 : 1;
-            _users.Add(user);
+            _context = context;
         }
 
-        public static void Update(User user)
+        public List<User> GetAll()
         {
-            var index = _users.FindIndex(u => u.Id == user.Id);
-            if (index == -1)
+            return _context.Users.ToList();
+        }
+
+        public User? Get(int id)
+        {
+            return _context.Users.Find(id);
+        }
+
+        public void Add(User user)
+        {
+            _context.Users.Add(user);
+            _context.SaveChanges();
+        }
+
+        public void Update(User user)
+        {
+            var existingUser = _context.Users.Find(user.Id);
+            if (existingUser is null)
                 return;
 
-            _users[index] = user;
+            existingUser.Name = user.Name;
+            existingUser.Email = user.Email;
+
+            _context.SaveChanges();
         }
 
-        public static void Delete(int id)
+        public void Delete(int id)
         {
-            var user = Get(id);
+            var user = _context.Users.Find(id);
             if (user is null)
                 return;
 
-            _users.Remove(user);
+            _context.Users.Remove(user);
+
+            _context.SaveChanges();
         }
     }
 }

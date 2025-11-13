@@ -8,17 +8,24 @@ namespace UserManagement.Api.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
+        private readonly UserService _userService;
+
+        public UsersController(UserService userService)
+        {
+            _userService = userService;
+        }
+
 
         [HttpGet]
         public IActionResult GetUsers()
         {
-            return Ok(UserService.GetAll());
+            return Ok(_userService.GetAll());
         }
 
         [HttpGet("{id}")]
         public IActionResult GetUserById(int id)
         {
-            var user = UserService.Get(id);
+            var user = _userService.Get(id);
 
             if (user == null)
                 return NotFound();
@@ -32,7 +39,7 @@ namespace UserManagement.Api.Controllers
             if (newUser == null)
                 return BadRequest();
 
-            UserService.Add(newUser);
+            _userService.Add(newUser);
 
             return CreatedAtAction(nameof(GetUserById), new { id = newUser.Id }, newUser);
         }
@@ -45,11 +52,11 @@ namespace UserManagement.Api.Controllers
 
             updatedUser.Id = id;
 
-            var existingUser = UserService.Get(id);
+            var existingUser = _userService.Get(id);
             if (existingUser is null)
                 return NotFound();
 
-            UserService.Update(updatedUser);
+            _userService.Update(updatedUser);
 
             return NoContent();
         }
@@ -57,12 +64,12 @@ namespace UserManagement.Api.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteUser(int id)
         {
-            var user = UserService.Get(id);
+            var user = _userService.Get(id);
 
             if (user is null)
                 return NotFound();
 
-            UserService.Delete(id);
+            _userService.Delete(id);
 
             return NoContent();
         }
