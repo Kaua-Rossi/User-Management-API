@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using UserManagement.Api.Models;
+using UserManagement.Api.Services;
 
 namespace UserManagement.Api.Controllers
 {
@@ -7,27 +8,20 @@ namespace UserManagement.Api.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private static readonly List<User> _users = new List<User>
-        {
-            new User { Id = 1, Name = "Daniel Ross", Email = "daniel67@domain.com" },
-            new User { Id = 2, Name = "Alice Johnson", Email = "alice32@domain.com" },
-            new User { Id = 3, Name = "John Doe", Email = "jdoe1900@domain.com" }
-        };
 
         [HttpGet]
         public IActionResult GetUsers()
-        {   
-            return Ok(_users);
+        {
+            return Ok(UserService.GetAll());
         }
 
         [HttpGet("{id}")]
         public IActionResult GetUserById(int id)
         {
-            var user = _users.FirstOrDefault(u => u.Id == id);
+            var user = UserService.Get(id);
 
-            if (user == null) {
+            if (user == null)
                 return NotFound();
-            }
 
             return Ok(user);
         }
@@ -35,12 +29,10 @@ namespace UserManagement.Api.Controllers
         [HttpPost]
         public IActionResult CreateUser([FromBody] User newUser)
         {
-            if (newUser == null) {
+            if (newUser == null)
                 return BadRequest();
-            }
 
-            newUser.Id = _users.Max(u => u.Id) + 1;
-            _users.Add(newUser);
+            UserService.Add(newUser);
 
             return CreatedAtAction(nameof(GetUserById), new { id = newUser.Id }, newUser);
         }
@@ -48,31 +40,30 @@ namespace UserManagement.Api.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateUser(int id, [FromBody] User updatedUser)
         {
-            if (updatedUser == null) {
+            if (updatedUser == null)
                 return BadRequest();
-            }
 
-            var userToUpdate = _users.FirstOrDefault(u => u.Id == id);
+            updatedUser.Id = id;
 
-            if (userToUpdate == null) {
+            var existingUser = UserService.Get(id);
+            if (existingUser is null)
                 return NotFound();
-            }
 
-            userToUpdate.Name = updatedUser.Name;
-            userToUpdate.Email = updatedUser.Email;
+            UserService.Update(updatedUser);
+
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeleteUser(int id)
         {
-            var userToDelete = _users.FirstOrDefault(u => u.Id == id);
+            var user = UserService.Get(id);
 
-            if (userToDelete == null) {
+            if (user is null)
                 return NotFound();
-            }
 
-            _users.Remove(userToDelete);
+            UserService.Delete(id);
+
             return NoContent();
         }
     }
